@@ -1,11 +1,12 @@
+# middlewares/user_middleware.py
 from aiogram import BaseMiddleware
 from aiogram.types import Message, CallbackQuery, TelegramObject
 from typing import Callable, Awaitable, Any, Dict, Union
 
 
 class UserMiddleware(BaseMiddleware):
-	def __init__(self, i18n):
-		self.i18n = i18n
+	def __init__(self):
+		pass
 	
 	async def __call__(
 		self,
@@ -13,8 +14,6 @@ class UserMiddleware(BaseMiddleware):
 		event: Union[Message, CallbackQuery],
 		data: Dict[str, Any]
 	) -> Any:
-		data["i18n"] = self.i18n
-		
 		user = None
 		
 		if hasattr(event, "from_user") and event.from_user:

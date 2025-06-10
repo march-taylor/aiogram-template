@@ -15,15 +15,15 @@ service = StartService()
 async def start_command(
 	message: Message,
 	state: FSMContext,
-	i18n: I18nMiddleware,
-	user: dict | None
+	user: dict | None,
+	_: callable  # Функция перевода
 ):
 	if user:  # Пользователь уже есть в БД
-		await message.answer(i18n.gettext("welcome", locale=user['language']))
+		await message.answer(_("welcome"))
 	else:	 # Новый пользователь
 		await state.set_state(RegistrationStates.select_language)
 		await message.answer(
-			i18n.gettext("choose_language"),
+			_("choose_language"),
 			reply_markup=language_keyboard()
 		)
 
@@ -31,16 +31,15 @@ async def start_command(
 async def set_language(
 	callback: CallbackQuery,
 	state: FSMContext,
-	i18n: I18nMiddleware
+	_: callable
 ):
 	lang_code = callback.data.split("_")[1]
 	
-	# Добавление пользователя в базу данных
 	from database.users import UserRepository
 	user_repo = UserRepository()
 	await user_repo.add_user(callback.from_user.id, lang_code)
 	
 	await state.clear()
-	await callback.message.edit_text(i18n.gettext("language_changed", locale=lang_code))
+	await callback.message.edit_text(_("language_changed"))
 	await callback.answer()
-	await callback.message.answer(i18n.gettext("welcome", locale=lang_code))
+	await callback.message.answer(_("welcome"))
