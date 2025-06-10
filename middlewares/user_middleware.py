@@ -13,26 +13,15 @@ class UserMiddleware(BaseMiddleware):
 		event: Union[Message, CallbackQuery],
 		data: Dict[str, Any]
 	) -> Any:
+		data["i18n"] = self.i18n
+		
 		user = None
 		
-		# Получение пользователя в зависимости от типа события
-		if isinstance(event, Message):
-			user = event.from_user
-		elif isinstance(event, CallbackQuery):
-			user = event.from_user
-		
-		if user:
+		if hasattr(event, "from_user") and event.from_user:
 			from database.users import UserRepository
 			user_repo = UserRepository()
-			
-			db_user = await user_repo.get_user(user.id)
-			if not db_user:
-				db_user = await user_repo.add_user(
-					user.id, 
-					await self.i18n.get_user_locale(user)
-				)
-			
-			data["user"] = db_user
-			data["i18n"] = self.i18n
+			user = await user_repo.get_user(event.from_user.id)
+		
+		data["user"] = user
 		
 		return await handler(event, data)
