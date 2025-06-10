@@ -7,9 +7,9 @@ from sqlalchemy.orm import declarative_base
 Base = declarative_base()
 
 class User(Base):
-    __tablename__ = "users"
+	__tablename__ = "users"
 
-    id = Column(Integer, primary_key=True)
-    user_id = Column(BigInteger, unique=True)
-    language = Column(String(2), default="en")
-    added_at = Column(Integer, server_default=func.strftime('%s', 'now'))
+	id = Column(Integer, primary_key=True)
+	user_id = Column(BigInteger, unique=True)
+	language = Column(String(2), default="en")
+	added_at = Column(Integer, server_default=func.strftime('%s', 'now'))
