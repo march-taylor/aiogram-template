@@ -12,7 +12,6 @@ from database.database import db
 from database.setup import Base
 from middlewares.user import UserMiddleware
 from middlewares.i18n import I18nMiddleware
-from features.start.handlers import router as start_router
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -28,6 +27,10 @@ async def main():
 	bot = Bot(token=Config.BOT_TOKEN)
 	dp = Dispatcher(storage=MemoryStorage())
 	
+	# Установка MessagingService
+	from services.messaging import MessagingService
+	MessagingService.setup(bot)
+
 	# Инициализация middleware
 	i18n_middleware = I18nMiddleware()
 	user_middleware = UserMiddleware()
@@ -39,6 +42,7 @@ async def main():
 	dp.callback_query.outer_middleware.register(user_middleware)
 	
 	# Регистрация роутеров
+	from features.start.handlers import router as start_router
 	dp.include_router(start_router)
 	
 	await dp.start_polling(bot)

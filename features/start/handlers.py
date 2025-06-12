@@ -1,8 +1,9 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
-from aiogram.utils.i18n.middleware import I18nMiddleware
 
+from services.language import LanguageService
+from services.messaging import MessagingService
 from .keyboards import language_keyboard
 from .service import StartService
 from .states import RegistrationStates
@@ -33,13 +34,11 @@ async def set_language(
 	state: FSMContext,
 	_: callable
 ):
-	lang_code = callback.data.split("_")[1]
-	
-	from database.users import UserRepository
-	user_repo = UserRepository()
-	await user_repo.add_user(callback.from_user.id, lang_code)
+	language_code = callback.data.split("_")[1]
+	await LanguageService.set_user_language(user_id=callback.from_user.id, language_code=language_code)
+	language = await LanguageService.get_user_language(callback.from_user.id)
 	
 	await state.clear()
-	await callback.message.edit_text(_("language_changed"))
+	await MessagingService.send_localized(user_id=callback.from_user.id, message_key="language_changed")
 	await callback.answer()
-	await callback.message.answer(_("welcome"))
+	await MessagingService.send_localized(user_id=callback.from_user.id, message_key="welcome")

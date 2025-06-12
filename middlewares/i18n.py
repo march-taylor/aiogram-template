@@ -22,7 +22,7 @@ class I18nMiddleware(BaseMiddleware):
 		db_user = await user_repo.get_user(user_id)
 		return db_user['language'] if db_user else Config.DEFAULT_LANGUAGE
 	
-	def gettext(self, key: str, locale: str = None, **kwargs) -> str:
+	def get_text(self, key: str, locale: str = None, **kwargs) -> str:
 		locale = locale or Config.DEFAULT_LANGUAGE
 		text = self.locales.get(locale, {}).get(key, key)
 		return text.format(**kwargs) if kwargs else text
@@ -33,6 +33,8 @@ class I18nMiddleware(BaseMiddleware):
 
 		user_id = event.from_user.id
 		locale = await self.get_user_locale(user_id)
-		
-		data["_"] = lambda key, **kwargs: self.gettext(key, locale=locale, **kwargs)
+
+		data["_"] = lambda key, **kwargs: self.get_text(key, locale=locale, **kwargs)
 		return await handler(event, data)
+
+i18n = I18nMiddleware()

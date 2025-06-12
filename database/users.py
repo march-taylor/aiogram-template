@@ -7,9 +7,14 @@ from database.setup import User
 class UserRepository:
 	async def add_user(self, user_id: int, language: str = "en") -> dict:
 		async with db.session() as session:
+			# Проверка, есть ли уже пользователь
+			existing_user = await session.execute(select(User).where(User.user_id == user_id))
+			if existing_user.scalar_one_or_none():
+				return await self.update_language(user_id, language)
+				
 			user = User(user_id=user_id, language=language)
 			session.add(user)
-			await session.flush()
+			await session.commit()
 			return {"user_id": user.user_id, "language": user.language}
 
 	async def get_user(self, user_id: int) -> dict | None:
